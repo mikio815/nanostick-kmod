@@ -41,10 +41,12 @@ static int __init fm_init(void)
     // 相対移動
     set_bit(REL_X, fm_dev->relbit);
     set_bit(REL_Y, fm_dev->relbit);
+    set_bit(REL_WHEEL, fm_dev->relbit);
 
     // ボタン
     set_bit(BTN_LEFT,  fm_dev->keybit);
     set_bit(BTN_RIGHT, fm_dev->keybit);
+    set_bit(KEY_LEFTCTRL, fm_dev->keybit);
 
     err = input_register_device(fm_dev);
     if (err) {
