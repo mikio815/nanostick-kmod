@@ -4,16 +4,21 @@
 #include <linux/kthread.h>
 #include <linux/delay.h>
 
+#include "ns_action.h"
+
 static struct input_dev *fm_dev;
 static struct task_struct *fm_thread;
 
 static int fm_thread_fn(void *data)
 {
     while (!kthread_should_stop()) {
+        struct ns_action a = {
+            .type = NS_ACT_MOVE,
+            .x = 1,
+            .y = 0,
+        };
 
-        // 後でtty経由に直す
-        input_report_rel(fm_dev, REL_X, 1);  // 右へ1px
-        input_sync(fm_dev);
+        ns_emit_action(fm_dev, &a);
 
         msleep(10);
     }

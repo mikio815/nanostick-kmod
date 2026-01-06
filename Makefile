@@ -1,4 +1,5 @@
 obj-m += fake_mouse.o
+obj-m += nanostick.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD  := $(shell pwd)
