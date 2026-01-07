@@ -1,5 +1,5 @@
 #include <linux/kernel.h>
-#include <linux/unaligned/le_byteshift.h>
+#include <linux/unaligned.h>
 
 #include "ns_proto.h"
 
