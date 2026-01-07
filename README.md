@@ -33,7 +33,11 @@ make -C tools
 PTYで擬似入力
 
 ```sh
-sudo tools/ns_pty_test --frame
+sudo tools/ns_pty_test --frame --ly 40 --ry 40   # Y同方向でスクロール
+sudo tools/ns_pty_test --frame --lx 50 --rx -50  # X逆方向でズーム
+sudo tools/ns_pty_test --frame --lx 20 --ly 5    # 通常移動
+sudo tools/ns_pty_test --frame --buttons 1       # 左クリック押下
+sudo tools/ns_pty_test --frame --buttons 0       # 左クリック解放
 ```
 
 実デバイスに適用（例: /dev/ttyUSB0）
