@@ -21,7 +21,6 @@ static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
     int dx, dy_move, scroll = 0, zoom = 0;
     u8 changed;
 
-    /* Fallback: keep log for debugging. */
     pr_info("[nanostick] seq=%u lx=%d ly=%d rx=%d ry=%d btn=%u flg=%u\n",
             f->seq, f->lx, f->ly, f->rx, f->ry, f->buttons, f->flags);
 
@@ -72,7 +71,6 @@ static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
         ns_emit_action(dev, &a);
     }
 
-    /* Buttons: bit0=left, bit1=right (current assumption). */
     changed = ld->prev_buttons ^ f->buttons;
     if (changed & 0x01) {
         struct ns_action a = {
@@ -98,7 +96,6 @@ static int ns_ldisc_open(struct tty_struct *tty) {
     struct ns_ldisc_ctx *ld;
 
     pr_info("[nanostick] ldisc open\n");
-    /* Allow input buffering; 0 can drop all data. */
     tty->receive_room = 65536;
     ld = kzalloc(sizeof(*ld), GFP_KERNEL);
     if (!ld)
