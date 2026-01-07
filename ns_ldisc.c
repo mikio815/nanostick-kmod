@@ -5,16 +5,93 @@
 #include <linux/slab.h>
 #include "ns_ldisc.h"
 #include "ns_proto.h"
+#include "ns_action.h"
+#include "ns_input.h"
 
 struct ns_ldisc_ctx {
     struct ns_proto_state proto;
+    u8 prev_buttons;
 };
 
 static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
 {
-    (void)ctx;
+    struct tty_struct *tty = ctx;
+    struct ns_ldisc_ctx *ld = tty ? tty->disc_data : NULL;
+    struct input_dev *dev = ns_input_get_dev();
+    int dx, dy_move, scroll = 0, zoom = 0;
+    u8 changed;
+
+    /* Fallback: keep log for debugging. */
     pr_info("[nanostick] seq=%u lx=%d ly=%d rx=%d ry=%d btn=%u flg=%u\n",
             f->seq, f->lx, f->ly, f->rx, f->ry, f->buttons, f->flags);
+
+    if (!ld || !dev)
+        return;
+
+    /*
+     - Y軸 同方向: 上下スクロール
+     - X軸 逆方向: ズームイン/アウト
+    */
+    dx = f->lx + f->rx;
+    dy_move = f->ly + f->ry;
+
+    if (f->ly && f->ry &&
+        ((f->ly > 0 && f->ry > 0) || (f->ly < 0 && f->ry < 0))) {
+        scroll = (f->ly + f->ry) / 2;
+        dy_move = 0;
+    }
+
+    if (f->lx && f->rx &&
+        ((f->lx > 0 && f->rx < 0) || (f->lx < 0 && f->rx > 0))) {
+        zoom = (f->lx - f->rx) / 2;
+        dx = 0;
+    }
+
+    if (dx || dy_move) {
+        struct ns_action a = {
+            .type = NS_ACT_MOVE,
+            .x = dx,
+            .y = dy_move,
+        };
+        ns_emit_action(dev, &a);
+    }
+
+    if (scroll) {
+        struct ns_action a = {
+            .type = NS_ACT_SCROLL,
+            .wheel = scroll,
+        };
+        ns_emit_action(dev, &a);
+    }
+
+    if (zoom) {
+        struct ns_action a = {
+            .type = NS_ACT_ZOOM,
+            .wheel = zoom,
+        };
+        ns_emit_action(dev, &a);
+    }
+
+    /* Buttons: bit0=left, bit1=right (current assumption). */
+    changed = ld->prev_buttons ^ f->buttons;
+    if (changed & 0x01) {
+        struct ns_action a = {
+            .type = NS_ACT_CLICK,
+            .button = BTN_LEFT,
+            .pressed = !!(f->buttons & 0x01),
+        };
+        ns_emit_action(dev, &a);
+    }
+    if (changed & 0x02) {
+        struct ns_action a = {
+            .type = NS_ACT_CLICK,
+            .button = BTN_RIGHT,
+            .pressed = !!(f->buttons & 0x02),
+        };
+        ns_emit_action(dev, &a);
+    }
+
+    ld->prev_buttons = f->buttons;
 }
 
 static int ns_ldisc_open(struct tty_struct *tty) {
@@ -27,6 +104,7 @@ static int ns_ldisc_open(struct tty_struct *tty) {
     if (!ld)
         return -ENOMEM;
     ns_proto_init(&ld->proto);
+    ld->prev_buttons = 0;
     tty->disc_data = ld;
     return 0;
 }

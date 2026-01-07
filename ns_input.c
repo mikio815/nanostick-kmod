@@ -43,3 +43,8 @@ void ns_input_exit(void)
     if (ns_dev)
         input_unregister_device(ns_dev);
 }
+
+struct input_dev *ns_input_get_dev(void)
+{
+    return ns_dev;
+}
