@@ -2,6 +2,7 @@
 #include <linux/init.h>
 
 #include "ns_input.h"
+#include "ns_ldisc.h"
 
 static int __init ns_init(void)
 {
@@ -13,6 +14,12 @@ static int __init ns_init(void)
     if (err)
         return err;
 
+    err = ns_ldisc_init();
+    if (err) {
+        ns_input_exit();
+        return err;
+    }
+
     pr_info("[nanostick] loaded successfully\n");
     return 0;
 }
@@ -21,6 +28,7 @@ static void __exit ns_exit(void)
 {
     pr_info("[nanostick] exit\n");
 
+    ns_ldisc_exit();
     ns_input_exit();
 }
 
