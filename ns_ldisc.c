@@ -6,6 +6,8 @@
 
 static int ns_ldisc_open(struct tty_struct *tty) {
     pr_info("[nanostick] ldisc open\n");
+    /* Allow input buffering; 0 can drop all data. */
+    tty->receive_room = 65536;
     return 0;
 }
 
