@@ -1,7 +1,12 @@
 #include <linux/kernel.h>
-#include <linux/unaligned.h>
+#include <asm/unaligned.h>
 
 #include "ns_proto.h"
+
+static inline u16 ns_le16(const u8 *p)
+{
+    return get_unaligned_le16(p);
+}
 
 void ns_proto_init(struct ns_proto_state *st)
 {
@@ -31,19 +36,20 @@ static bool ns_proto_try_emit(struct ns_proto_state *st,
     u16 crc_calc;
     u16 crc_recv;
     struct ns_proto_frame f;
+    const u8 *b = st->buf;
 
     crc_calc = ns_proto_crc16_ccitt_false(st->buf, 14);
-    crc_recv = get_unaligned_le16(&st->buf[14]);
+    crc_recv = ns_le16(&b[14]);
     if (crc_calc != crc_recv)
         return false;
 
-    f.seq = get_unaligned_le16(&st->buf[2]);
-    f.lx = (s16)get_unaligned_le16(&st->buf[4]);
-    f.ly = (s16)get_unaligned_le16(&st->buf[6]);
-    f.rx = (s16)get_unaligned_le16(&st->buf[8]);
-    f.ry = (s16)get_unaligned_le16(&st->buf[10]);
-    f.buttons = st->buf[12];
-    f.flags = st->buf[13];
+    f.seq = ns_le16(&b[2]);
+    f.lx = (s16)ns_le16(&b[4]);
+    f.ly = (s16)ns_le16(&b[6]);
+    f.rx = (s16)ns_le16(&b[8]);
+    f.ry = (s16)ns_le16(&b[10]);
+    f.buttons = b[12];
+    f.flags = b[13];
 
     if (cb)
         cb(&f, ctx);
