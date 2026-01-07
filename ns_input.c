@@ -1,6 +1,8 @@
 #include <linux/kernel.h>
 #include <linux/input.h>
 
+#include "ns_input.h"
+
 static struct input_dev *ns_dev;
 
 int ns_input_init(void)

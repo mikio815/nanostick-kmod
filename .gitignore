@@ -1,0 +1,19 @@
+# Kernel module build outputs
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.mod.cmd
+*.cmd
+*.d
+*.symvers
+*.order
+Module.symvers
+modules.order
+.tmp_versions/
+
+# Tool binaries
+tools/ns_ldisc_ctl
+tools/ns_pty_test
+
