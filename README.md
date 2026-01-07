@@ -47,7 +47,7 @@ sudo tools/ns_ldisc_ctl /dev/ttyUSB0 set
 
 ## systemd/udev での自動 ldisc 適用例
 
-`systemd/` ディレクトリにサンプルを置いています（CH340用）ww
+`systemd/` ディレクトリにサンプルを置いています（CH340用）
 
 1. ヘルパーを配置  
    `make -C tools && sudo install -m 0755 tools/ns_ldisc_ctl /usr/local/bin/`
