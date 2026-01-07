@@ -1,0 +1,16 @@
+[Unit]
+Description=Nanostick line discipline for %I
+# dev-%i.device is created by udev for /dev/ttyUSB0 -> dev-ttyUSB0.device
+BindsTo=dev-%i.device
+After=dev-%i.device
+
+[Service]
+Type=oneshot
+# LDISC ID must match NS_LDISC_ID in ns_ldisc.h (default 30)
+ExecStart=/usr/local/bin/ns_ldisc_ctl /dev/%I set 30
+ExecStop=/usr/local/bin/ns_ldisc_ctl /dev/%I reset
+RemainAfterExit=yes
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

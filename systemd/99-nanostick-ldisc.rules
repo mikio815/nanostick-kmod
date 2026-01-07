@@ -1,0 +1,5 @@
+ACTION=="add", SUBSYSTEM=="tty", KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", \
+  ENV{SYSTEMD_WANTS}="nanostick-ldisc@%E{DEVNAME}.service"
+
+ACTION=="remove", SUBSYSTEM=="tty", KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", \
+  RUN+="/usr/local/bin/ns_ldisc_ctl %E{DEVNAME} reset"
