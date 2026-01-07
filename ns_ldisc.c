@@ -14,7 +14,7 @@ static void ns_ldisc_close(struct tty_struct *tty) {
 }
 
 static void ns_ldisc_receive_buf(struct tty_struct *tty, const u8 *cp, const u8 *fp, size_t count) {
-    pr_debug("[nanostick] recv %zu bytes\n", count);
+    pr_info("[nanostick] recv %zu bytes\n", count);
 }
 
 static struct tty_ldisc_ops ns_ldisc_ops = {
