@@ -1,6 +1,6 @@
-#include <tty.h>
-#include <tty_ldisc.h>
-#include <kernel.h>
+#include <linux/tty.h>
+#include <linux/tty_ldisc.h>
+#include <linux/kernel.h>
 #include "ns_ldisc.h"
 
 static int ns_ldisc_open(struct tty_struct *tty) {
@@ -8,12 +8,12 @@ static int ns_ldisc_open(struct tty_struct *tty) {
     return 0;
 }
 
-static void ns_ldisc_open(struct tty_struct *tty) {
+static void ns_ldisc_close(struct tty_struct *tty) {
     pr_info("[nanostick] ldisc close\n");
 }
 
 static void ns_ldisc_receive_buf(struct tty_struct *tty, const u8 *cp, const u8 *fp, size_t count) {
-    pr_debug("[nanostick] recv %d bytes\n", count);
+    pr_debug("[nanostick] recv %zu bytes\n", count);
 }
 
 static struct tty_ldisc_ops ns_ldisc_ops = {
@@ -33,4 +33,3 @@ void ns_ldisc_exit(void)
 {
     tty_unregister_ldisc(NS_LDISC_ID);
 }
-
