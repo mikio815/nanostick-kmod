@@ -2,6 +2,7 @@ obj-m += fake_mouse.o
 obj-m += nanostick.o
 nanostick-objs := nanostick_main.o ns_input.o
 nanostick-objs += ns_ldisc.o
+nanostick-objs += ns_proto.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD  := $(shell pwd)

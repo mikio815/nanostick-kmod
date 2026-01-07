@@ -2,21 +2,49 @@
 #include <linux/tty_ldisc.h>
 #include <linux/kernel.h>
 #include <linux/version.h>
+#include <linux/slab.h>
 #include "ns_ldisc.h"
+#include "ns_proto.h"
+
+struct ns_ldisc_ctx {
+    struct ns_proto_state proto;
+};
+
+static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
+{
+    (void)ctx;
+    pr_info("[nanostick] seq=%u lx=%d ly=%d rx=%d ry=%d btn=%u flg=%u\n",
+            f->seq, f->lx, f->ly, f->rx, f->ry, f->buttons, f->flags);
+}
 
 static int ns_ldisc_open(struct tty_struct *tty) {
+    struct ns_ldisc_ctx *ld;
+
     pr_info("[nanostick] ldisc open\n");
     /* Allow input buffering; 0 can drop all data. */
     tty->receive_room = 65536;
+    ld = kzalloc(sizeof(*ld), GFP_KERNEL);
+    if (!ld)
+        return -ENOMEM;
+    ns_proto_init(&ld->proto);
+    tty->disc_data = ld;
     return 0;
 }
 
 static void ns_ldisc_close(struct tty_struct *tty) {
+    struct ns_ldisc_ctx *ld = tty->disc_data;
+
     pr_info("[nanostick] ldisc close\n");
+    kfree(ld);
+    tty->disc_data = NULL;
 }
 
 static void ns_ldisc_receive_buf(struct tty_struct *tty, const u8 *cp, const u8 *fp, size_t count) {
-    pr_info("[nanostick] recv %zu bytes\n", count);
+    struct ns_ldisc_ctx *ld = tty->disc_data;
+
+    if (!ld)
+        return;
+    ns_proto_feed(&ld->proto, cp, count, ns_ldisc_on_frame, tty);
 }
 
 static struct tty_ldisc_ops ns_ldisc_ops = {
