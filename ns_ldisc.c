@@ -10,8 +10,10 @@
 
 struct ns_ldisc_ctx {
     struct ns_proto_state proto;
-    u8 prev_buttons;
 };
+
+/* ボタン状態をモジュール全体で保持し、TTYの開閉をまたいで解放イベントを出せるようにする */
+static u8 ns_prev_buttons;
 
 static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
 {
@@ -71,7 +73,7 @@ static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
         ns_emit_action(dev, &a);
     }
 
-    changed = ld->prev_buttons ^ f->buttons;
+    changed = ns_prev_buttons ^ f->buttons;
     if (changed & 0x01) {
         struct ns_action a = {
             .type = NS_ACT_CLICK,
@@ -89,7 +91,7 @@ static void ns_ldisc_on_frame(const struct ns_proto_frame *f, void *ctx)
         ns_emit_action(dev, &a);
     }
 
-    ld->prev_buttons = f->buttons;
+    ns_prev_buttons = f->buttons;
 }
 
 static int ns_ldisc_open(struct tty_struct *tty) {
@@ -101,7 +103,6 @@ static int ns_ldisc_open(struct tty_struct *tty) {
     if (!ld)
         return -ENOMEM;
     ns_proto_init(&ld->proto);
-    ld->prev_buttons = 0;
     tty->disc_data = ld;
     return 0;
 }
