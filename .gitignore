@@ -17,3 +17,4 @@ modules.order
 tools/ns_ldisc_ctl
 tools/ns_pty_test
 
+.vscode/
